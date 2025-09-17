@@ -2,6 +2,8 @@ package com.example.demas_api.service
 
 import com.example.demas_api.dto.MedicineTotalStock
 import com.example.demas_api.model.HealthUnit
+import com.example.demas_api.model.MedicineStock
+import com.example.demas_api.model.enumeration.LocationType
 import com.example.demas_api.model.enumeration.MedicineAvailability
 import com.example.demas_api.repository.HealthUnitRepository
 import org.springframework.data.domain.Page
@@ -17,10 +19,29 @@ class HealthUnitService(
         page: Int,
         size: Int,
         searchTerm: String,
+        filter: LocationType
     ): Page<HealthUnit> {
         val pageable = PageRequest.of(page, size)
         val search = searchTerm.ifBlank { ".*" }
-        return  healthUnitRepository.findBySearchTerm(search, pageable)
+
+        return if (filter == LocationType.ALL) {
+            healthUnitRepository.findBySearchTerm(search, pageable)
+        } else {
+            healthUnitRepository.findBySearchTermAndLocationType(search, filter, pageable)
+        }
+    }
+
+    fun findMedicinesByUnit(cnesCode: String, page: Int, size: Int): Page<MedicineStock> {
+        val pageable = PageRequest.of(page, size)
+
+        if (!healthUnitRepository.existsById(cnesCode)) {
+            return Page.empty(pageable)
+        }
+
+        val content = healthUnitRepository.findAndPaginateMedicinesByUnit(cnesCode, pageable)
+        val totalElements = healthUnitRepository.countMedicinesByUnit(cnesCode)
+
+        return PageImpl(content, pageable, totalElements)
     }
 
     fun getAggregatedMedicineStock(
