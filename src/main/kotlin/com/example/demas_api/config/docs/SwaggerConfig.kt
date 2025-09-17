@@ -34,7 +34,7 @@ class SwaggerConfig {
                         ### Equipe e Colaboradores
                         - **Douglas Holanda** - Desenvolvedor - [GitHub](https://github.com/Doug16Yanc/)
                         - **Kaiane Maciel** - Desenvolvedora - [GitHub](https://github.com/KaianeSousa/)
-                        - **Letícia do Vale** - Desenvolvedora - [GitHub](https://github.com/Leititcia)
+                        - **Letícia do Vale** - Desenvolvedora - [GitHub](https://github.com/Leititcia/)
                         - **Wesley Rodrigues** - Desenvolvedor - [GitHub](https://github.com/Wesley00s/)
                     """.trimIndent())
                     .contact(
