@@ -13,7 +13,7 @@ class KeepAlive (
 
     private val webClient = webClientBuilder.build()
 
-    @Scheduled(fixedRate = 3600)
+    @Scheduled(fixedRate = 100000, initialDelay = 30000)
     fun keepAlive() {
         val response = webClient.get()
             .uri("https://demas-api.onrender.com/health")
