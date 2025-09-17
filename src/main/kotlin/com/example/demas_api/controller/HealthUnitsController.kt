@@ -31,7 +31,7 @@ class HealthUnitsController(
         @Parameter(description = "Quantidade de itens por página.")
         @RequestParam(defaultValue = "10") size: Int,
 
-        @Parameter(description = "Termo de busca para filtrar unidades pelo nome ou cidade.")
+        @Parameter(description = "Termo de busca para filtrar unidades pelo nome.")
         @RequestParam(required = false, defaultValue = "") searchTerm: String
     ): ResponseEntity<ApiResponse<HealthUnit>> {
         val healthUnitPage = healthUnitService.getAll(page, size, searchTerm)

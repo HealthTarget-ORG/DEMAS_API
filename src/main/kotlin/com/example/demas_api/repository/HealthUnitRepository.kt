@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.data.mongodb.repository.Query
 
 interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
-    @Query("{ \$or: [ { 'name': { \$regex: ?0, \$options: 'i' } }, { 'city': { \$regex: ?0, \$options: 'i' } } ] }")
+    @Query("{ \$or: [ { 'name': { \$regex: ?0, \$options: 'i' } } ] }")
     fun findBySearchTerm(searchTerm: String, pageable: Pageable): Page<HealthUnit>
 
     @Aggregation(pipeline = [
