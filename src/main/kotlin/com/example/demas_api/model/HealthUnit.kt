@@ -1,5 +1,6 @@
 package com.example.demas_api.model
 
+import com.example.demas_api.model.enumeration.LocationType
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.data.mongodb.core.mapping.Document
@@ -30,6 +31,9 @@ data class HealthUnit(
 
     @Field("email")
     val email: String?,
+
+    @Field("location_type")
+    val locationType: LocationType,
 
     @Field("last_stock_update")
     val lastStockUpdate: LocalDate,
