@@ -5,6 +5,7 @@ import com.example.demas_api.dto.DemasDataItemDto
 import com.example.demas_api.model.Address
 import com.example.demas_api.model.HealthUnit
 import com.example.demas_api.model.MedicineStock
+import com.example.demas_api.model.enumeration.LocationType
 import com.example.demas_api.repository.HealthUnitRepository
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
@@ -28,29 +29,37 @@ class EtlService(
         logger.info("Iniciando processo de ETL de estoque de medicamentos...")
 
         try {
-            val latestAvailableDate = findLatestAvailableDataDate()
-
-            if (latestAvailableDate == null) {
-                logger.warn("Nenhuma data com dados encontrada nos últimos 30 dias. Processo encerrado.")
+            val latestApiDate = findLatestAvailableDataDate()
+            if (latestApiDate == null) {
+                logger.warn("Nenhuma data com dados encontrada na API nos últimos 30 dias. Processo encerrado.")
                 return
             }
-            logger.info("Última data com dados encontrada na API: $latestAvailableDate")
+            logger.info("Data mais recente disponível na API DEMAS: {}", latestApiDate)
 
-            val allRawData = fetchAllDemasData(latestAvailableDate)
+            val lastDbUpdateDate = healthUnitRepository.findTopByOrderByLastStockUpdateDesc()?.lastStockUpdate
+            logger.info("Última data de atualização no banco de dados local: {}", lastDbUpdateDate)
+
+            if (lastDbUpdateDate != null && !latestApiDate.isAfter(lastDbUpdateDate)) {
+                logger.info("Os dados no banco de dados já estão atualizados. Nenhuma ação necessária.")
+                return
+            }
+
+            logger.info("Novos dados encontrados na API. Iniciando extração completa...")
+
+            val allRawData = fetchAllDemasData(latestApiDate)
             if (allRawData.isEmpty()) {
-                logger.warn("A data foi encontrada, mas a extração completa falhou. Processo encerrado.")
+                logger.warn("Extração falhou ou não retornou dados para a data {}. Processo encerrado.", latestApiDate)
                 return
             }
-            logger.info("Extração concluída. Total de ${allRawData.size} registros brutos encontrados.")
+            logger.info("Extração concluída: {} registros brutos encontrados.", allRawData.size)
 
             val aggregatedHealthUnits = transformAndAggregate(allRawData)
-            logger.info("Transformação concluída. Total de ${aggregatedHealthUnits.size} unidades de saúde agregadas.")
+            logger.info("Transformação concluída: {} unidades de saúde agregadas.", aggregatedHealthUnits.size)
 
             loadIntoDatabase(aggregatedHealthUnits)
-            logger.info("Processo de ETL concluído com sucesso!")
 
         } catch (e: Exception) {
-            logger.error("Erro durante o processo de ETL: ${e.message}", e)
+            logger.error("Erro crítico durante o processo de ETL: {}", e.message, e)
         }
     }
 
@@ -129,7 +138,6 @@ class EtlService(
     private fun transformAndAggregate(rawData: List<DemasDataItemDto>): List<HealthUnit> {
         val healthUnitsMap = mutableMapOf<String, MutableMap<String, MedicineStock>>()
         val healthUnitDetailsMap = mutableMapOf<String, DemasDataItemDto>()
-
         rawData.forEach { item ->
             healthUnitDetailsMap.putIfAbsent(item.codigoCnes, item)
 
@@ -152,6 +160,8 @@ class EtlService(
         }
 
         return healthUnitDetailsMap.map { (cnes, details) ->
+            val locationType = classifyLocation(details)
+
             val medicines = healthUnitsMap[cnes]?.values?.toList() ?: emptyList()
             HealthUnit(
                 cnesCode = cnes,
@@ -167,11 +177,23 @@ class EtlService(
                 ),
                 phone = details.telefone,
                 email = details.email,
+                locationType = locationType,
                 city = details.municipio,
                 state = details.uf,
                 lastStockUpdate = LocalDate.parse(details.dataPosicaoEstoque, DateTimeFormatter.ISO_LOCAL_DATE),
                 medicines = medicines
             )
+        }
+    }
+
+    private fun classifyLocation(unitDetails: DemasDataItemDto): LocationType {
+        val street = unitDetails.logradouro?.uppercase() ?: ""
+        val neighborhood = unitDetails.bairro?.uppercase() ?: ""
+
+        return when {
+            street.contains("DISTRITO") || neighborhood.contains("DISTRITO") -> LocationType.DISTRITAL
+            neighborhood.contains("ZONA RURAL") -> LocationType.RURAL
+            else -> LocationType.URBANA
         }
     }
 
