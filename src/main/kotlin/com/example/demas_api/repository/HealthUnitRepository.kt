@@ -2,6 +2,8 @@ package com.example.demas_api.repository
 
 import com.example.demas_api.dto.MedicineTotalStock
 import com.example.demas_api.model.HealthUnit
+import com.example.demas_api.model.MedicineStock
+import com.example.demas_api.model.enumeration.LocationType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.repository.Aggregation
@@ -11,6 +13,12 @@ import org.springframework.data.mongodb.repository.Query
 interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
     @Query("{ \$or: [ { 'name': { \$regex: ?0, \$options: 'i' } } ] }")
     fun findBySearchTerm(searchTerm: String, pageable: Pageable): Page<HealthUnit>
+
+    @Query("{ \$and: [ " +
+            "{ \$or: [ { 'name': { \$regex: ?0, \$options: 'i' } }, { 'city': { \$regex: ?0, \$options: 'i' } } ] }, " +
+            "{ 'location_type': ?1 } " +
+            "] }")
+    fun findBySearchTermAndLocationType(searchTerm: String, locationType: LocationType, pageable: Pageable): Page<HealthUnit>
 
     @Aggregation(pipeline = [
         "{ \$unwind: '\$medicines' }",
@@ -23,7 +31,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
         "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
     ])
     fun aggregateStockAvailable(searchTerm: String, pageable: Pageable): List<MedicineTotalStock>
-
 
     @Aggregation(pipeline = [
         "{ \$unwind: '\$medicines' }",
@@ -100,5 +107,24 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
         "{ \$count: 'total' }"
     ])
     fun countUnitsWithMedicineInStock(searchTerm: String): Long
+
+    fun findTopByOrderByLastStockUpdateDesc(): HealthUnit?
+
+    @Aggregation(pipeline = [
+        "{ \$match: { '_id': ?0 } }",
+        "{ \$unwind: '\$medicines' }",
+        "{ \$sort: { 'medicines.description': 1 } }",
+        "{ \$skip: ?#{#pageable.offset} }",
+        "{ \$limit: ?#{#pageable.pageSize} }",
+        "{ \$replaceRoot: { newRoot: '\$medicines' } }"
+    ])
+    fun findAndPaginateMedicinesByUnit(cnesCode: String, pageable: Pageable): List<MedicineStock>
+
+    @Aggregation(pipeline = [
+        "{ \$match: { '_id': ?0 } }",
+        "{ \$unwind: '\$medicines' }",
+        "{ \$count: 'total' }"
+    ])
+    fun countMedicinesByUnit(cnesCode: String): Long
 
 }
