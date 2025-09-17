@@ -92,7 +92,7 @@ class HealthUnitsController(
         description = "Dado o código CNES de uma unidade, retorna uma lista paginada de medicamentos e seus estoques."
     )
     fun getMedicinesByUnit(
-        @Parameter(description = "Código CNES da unidade de saúde.", required = true, example = "9702047")
+        @Parameter(description = "Código CNES da unidade de saúde.", required = true, example = "9707204")
         @PathVariable cnesCode: String,
 
         @Parameter(description = "Número da página a ser retornada (inicia em 0).")
