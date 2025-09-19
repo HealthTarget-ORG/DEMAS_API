@@ -27,7 +27,7 @@ class HealthUnitsController(
     @GetMapping
     @Operation(
         summary = "Busca paginada de unidades de saúde",
-        description = "Retorna uma lista paginada de todas as unidades de saúde. Permite uma busca opcional por nome ou cidade da unidade."
+        description = "Retorna uma lista paginada de todas as unidades de saúde. Permite uma busca opcional por nome da unidade."
     )
     fun getAll(
         @Parameter(description = "Número da página a ser retornada (inicia em 0).")
