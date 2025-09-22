@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import java.util.regex.Pattern
 
 @Service
 class HealthUnitService(
@@ -22,7 +23,7 @@ class HealthUnitService(
         filter: LocationType
     ): Page<HealthUnit> {
         val pageable = PageRequest.of(page, size)
-        val search = searchTerm.ifBlank { ".*" }
+        val search = if (searchTerm.isBlank()) ".*" else Pattern.quote(searchTerm)
 
         return if (filter == LocationType.ALL) {
             healthUnitRepository.findBySearchTerm(search, pageable)
@@ -51,7 +52,7 @@ class HealthUnitService(
         filter: MedicineAvailability
     ): Page<MedicineTotalStock> {
         val pageable = PageRequest.of(page, size)
-        val search = searchTerm.ifBlank { ".*" }
+        val search = if (searchTerm.isBlank()) ".*" else Pattern.quote(searchTerm)
 
         val content: List<MedicineTotalStock>
         val totalElements: Long
@@ -80,7 +81,7 @@ class HealthUnitService(
         searchTerm: String
     ): Page<HealthUnit> {
         val pageable = PageRequest.of(page, size)
-        val search = searchTerm.ifBlank { ".*" }
+        val search = if (searchTerm.isBlank()) ".*" else Pattern.quote(searchTerm)
 
         val content = healthUnitRepository.findUnitsWithMedicineInStock(search, pageable)
         val totalElements = healthUnitRepository.countUnitsWithMedicineInStock(search)
