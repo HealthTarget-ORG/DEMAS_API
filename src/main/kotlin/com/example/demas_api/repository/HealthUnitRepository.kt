@@ -26,8 +26,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
         "{ \$group: { _id: '\$medicines.catmat_code', totalStock: { \$sum: '\$medicines.total_quantity' }, description: { \$first: '\$medicines.description' } } }",
         "{ \$match: { 'totalStock': { \$gt: 0 } } }",
         "{ \$sort: { description: 1 } }",
-        "{ \$skip: ?#{#pageable.offset} }",
-        "{ \$limit: ?#{#pageable.pageSize} }",
         "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
     ])
     fun aggregateStockAvailable(searchTerm: String, pageable: Pageable): List<MedicineTotalStock>
@@ -38,8 +36,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
         "{ \$group: { _id: '\$medicines.catmat_code', totalStock: { \$sum: '\$medicines.total_quantity' }, description: { \$first: '\$medicines.description' } } }",
         "{ \$match: { 'totalStock': { \$eq: 0 } } }",
         "{ \$sort: { description: 1 } }",
-        "{ \$skip: ?#{#pageable.offset} }",
-        "{ \$limit: ?#{#pageable.pageSize} }",
         "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
     ])
     fun aggregateStockUnavailable(searchTerm: String, pageable: Pageable): List<MedicineTotalStock>
@@ -71,8 +67,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
                 "description: { \$first: '\$medicines.description' } " +
                 "} }",
         "{ \$sort: { description: 1 } }",
-        "{ \$skip: ?#{#pageable.offset} }",
-        "{ \$limit: ?#{#pageable.pageSize} }",
         "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
     ])
     fun aggregateStockAll(searchTerm: String, pageable: Pageable): List<MedicineTotalStock>
@@ -97,8 +91,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
                 "] } " +
                 "} " +
                 "} } }",
-        "{ \$skip: ?#{#pageable.offset} }",
-        "{ \$limit: ?#{#pageable.pageSize} }"
     ])
     fun findUnitsWithMedicineInStock(searchTerm: String, pageable: Pageable): List<HealthUnit>
 
@@ -114,8 +106,6 @@ interface HealthUnitRepository: MongoRepository<HealthUnit, String> {
         "{ \$match: { '_id': ?0 } }",
         "{ \$unwind: '\$medicines' }",
         "{ \$sort: { 'medicines.description': 1 } }",
-        "{ \$skip: ?#{#pageable.offset} }",
-        "{ \$limit: ?#{#pageable.pageSize} }",
         "{ \$replaceRoot: { newRoot: '\$medicines' } }"
     ])
     fun findAndPaginateMedicinesByUnit(cnesCode: String, pageable: Pageable): List<MedicineStock>
