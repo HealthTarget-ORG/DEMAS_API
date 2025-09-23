@@ -3,6 +3,7 @@ package com.example.demas_api.controller
 import com.example.demas_api.dto.ApiResponse
 import com.example.demas_api.dto.MedicineTotalStock
 import com.example.demas_api.dto.PaginationResponse
+import com.example.demas_api.model.enumeration.DrugClassification
 import com.example.demas_api.model.enumeration.MedicineAvailability
 import com.example.demas_api.service.HealthUnitService
 import io.swagger.v3.oas.annotations.Operation
@@ -35,10 +36,13 @@ class MedicinesController(
         @Parameter(description = "Termo de busca para filtrar os medicamentos pelo nome.")
         @RequestParam(required = false, defaultValue = "") searchTerm: String,
 
+        @Parameter(description = "Filtro para exibir populares (`BASIC`), de alto custo (`EXPENSIVE`), ou todos (`ALL`)")
+        @RequestParam(defaultValue = "BASIC") classification: DrugClassification,
+
         @Parameter(description = "Filtro para exibir medicamentos com estoque (`AVAILABLE`), sem estoque (`UNAVAILABLE`), ou todos (`ALL`).")
         @RequestParam(defaultValue = "ALL") filter: MedicineAvailability
     ): ResponseEntity<ApiResponse<MedicineTotalStock>> {
-        val summaries = healthUnitService.getAggregatedMedicineStock(page, size, searchTerm, filter)
+        val summaries = healthUnitService.getAggregatedMedicineStock(page, size, searchTerm, filter, classification)
         return ResponseEntity.ok(
             ApiResponse(
                 data = summaries.content,
