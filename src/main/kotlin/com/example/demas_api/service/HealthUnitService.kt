@@ -68,17 +68,17 @@ class HealthUnitService(
         when (filter) {
             MedicineAvailability.AVAILABLE -> {
                 content = healthUnitRepository.aggregateStockAvailable(search, classificationRegex, pageable)
-                totalElements = healthUnitRepository.countStockAvailable(search, classificationRegex)
+                totalElements = healthUnitRepository.countStockAvailable(search, classificationRegex) ?: 0L
             }
 
             MedicineAvailability.UNAVAILABLE -> {
                 content = healthUnitRepository.aggregateStockUnavailable(search, classificationRegex, pageable)
-                totalElements = healthUnitRepository.countStockUnavailable(search, classificationRegex)
+                totalElements = healthUnitRepository.countStockUnavailable(search, classificationRegex) ?: 0L
             }
 
             MedicineAvailability.ALL -> {
                 content = healthUnitRepository.aggregateStockAll(search, classificationRegex, pageable)
-                totalElements = healthUnitRepository.countStockAll(search, classificationRegex)
+                totalElements = healthUnitRepository.countStockAll(search, classificationRegex) ?: 0L
             }
         }
 

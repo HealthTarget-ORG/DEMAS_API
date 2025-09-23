@@ -65,24 +65,26 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
             "{ \$unwind: '\$medicines' }",
             "{ \$match: { 'medicines.description': { \$regex: ?0, \$options: 'i' } } }",
             "{ \$match: { 'medicines.description': { \$regex: ?1, \$options: 'i' } } }",
-            "{ \$group: { _id: '\$medicines.catmat_code' } }",
+            "{ \$group: { _id: '\$medicines.catmat_code', totalStock: { \$sum: '\$medicines.total_quantity' } } }",
             "{ \$match: { 'totalStock': { \$gt: 0 } } }",
             "{ \$count: 'total' }"
         ]
     )
-    fun countStockAvailable(searchTerm: String, classificationRegex: String): Long
+    fun countStockAvailable(searchTerm: String, classificationRegex: String): Long?
+
 
     @Aggregation(
         pipeline = [
             "{ \$unwind: '\$medicines' }",
             "{ \$match: { 'medicines.description': { \$regex: ?0, \$options: 'i' } } }",
             "{ \$match: { 'medicines.description': { \$regex: ?1, \$options: 'i' } } }",
-            "{ \$group: { _id: '\$medicines.catmat_code' } }",
+            "{ \$group: { _id: '\$medicines.catmat_code', totalStock: { \$sum: '\$medicines.total_quantity' } } }",
             "{ \$match: { 'totalStock': { \$eq: 0 } } }",
             "{ \$count: 'total' }"
         ]
     )
-    fun countStockUnavailable(searchTerm: String, classificationRegex: String): Long
+    fun countStockUnavailable(searchTerm: String, classificationRegex: String): Long? // ✨ Retorne um Long nulo
+
 
     @Aggregation(
         pipeline = [
@@ -109,7 +111,8 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
             "{ \$count: 'total' }"
         ]
     )
-    fun countStockAll(searchTerm: String, classificationRegex: String): Long
+    fun countStockAll(searchTerm: String, classificationRegex: String): Long?
+
 
     @Aggregation(
         pipeline = [
