@@ -1,4 +1,4 @@
-package com.example.demas_api.model.enumeration;
+package com.example.demas_api.model.enumeration
 
 enum class DrugClassification {
     BASIC,
