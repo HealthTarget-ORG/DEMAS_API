@@ -13,6 +13,10 @@ springdoc:
   swagger-ui:
     path: /
 
+google:
+  maps:
+    api-key: ${GOOGLE_API_KEY}
+
 logging:
   level:
     org.springframework.web: DEBUG
