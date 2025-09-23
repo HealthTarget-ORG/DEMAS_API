@@ -18,7 +18,7 @@ data class HealthUnit(
     val address: Address,
 
     @Field("location")
-    val location: GeoJsonPoint,
+    var location: GeoJsonPoint,
 
     @Field("city")
     val city: String,
