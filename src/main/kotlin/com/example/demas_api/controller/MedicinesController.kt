@@ -24,7 +24,11 @@ class MedicinesController(
     @GetMapping("/summary/all")
     @Operation(
         summary = "Agrupa e resume o estoque de todos os medicamentos",
-        description = "Retorna uma lista paginada com o resumo do estoque total de cada medicamento, somando as quantidades de todas as unidades de saúde. Permite filtrar por medicamentos com estoque (`AVAILABLE`), sem estoque (`UNAVAILABLE`) ou todos (`ALL`)."
+        description =
+            "Retorna uma lista paginada com o resumo do estoque total de cada medicamento," +
+            " somando as quantidades de todas as unidades de saúde. Permite filtrar por medicamentos" +
+            " com estoque (`AVAILABLE`), sem estoque (`UNAVAILABLE`) ou todos (`ALL`). Além de classificá-los" +
+            " por medicamentos populares (`BASIC`), de alto custo (`EXPENSIVE`) ou todos (`ALL`)."
     )
     fun getAllMedicineSummaries(
         @Parameter(description = "Número da página a ser retornada (inicia em 0).")
@@ -37,7 +41,7 @@ class MedicinesController(
         @RequestParam(required = false, defaultValue = "") searchTerm: String,
 
         @Parameter(description = "Filtro para exibir populares (`BASIC`), de alto custo (`EXPENSIVE`), ou todos (`ALL`)")
-        @RequestParam(defaultValue = "BASIC") classification: DrugClassification,
+        @RequestParam(defaultValue = "ALL") classification: DrugClassification,
 
         @Parameter(description = "Filtro para exibir medicamentos com estoque (`AVAILABLE`), sem estoque (`UNAVAILABLE`), ou todos (`ALL`).")
         @RequestParam(defaultValue = "ALL") filter: MedicineAvailability
