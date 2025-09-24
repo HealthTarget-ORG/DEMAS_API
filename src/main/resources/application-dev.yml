@@ -20,6 +20,9 @@ google:
 health-check:
   url: ${HEALTH_CHECK_URL}
 
+server:
+  forward-headers-strategy: native
+
 logging:
   level:
     org.springframework.web: DEBUG
