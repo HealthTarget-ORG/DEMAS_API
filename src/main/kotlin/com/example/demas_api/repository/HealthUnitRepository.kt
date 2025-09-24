@@ -33,7 +33,7 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
             "{ \$match: { 'medicines.description': { \$regex: ?1, \$options: 'i' } } }",
             "{ \$group: { _id: '\$medicines.catmat_code', totalStock: { \$sum: '\$medicines.total_quantity' }, description: { \$first: '\$medicines.description' } } }",
             "{ \$match: { 'totalStock': { \$gt: 0 } } }",
-            "{ \$sort: { description: 1 } }",
+            "{ \$sort: { totalStock: -1 } }",
             "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
         ]
     )
@@ -72,7 +72,6 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
     )
     fun countStockAvailable(searchTerm: String, classificationRegex: String): Long?
 
-
     @Aggregation(
         pipeline = [
             "{ \$unwind: '\$medicines' }",
@@ -96,7 +95,7 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
                     "totalStock: { \$sum: '\$medicines.total_quantity' }, " +
                     "description: { \$first: '\$medicines.description' } " +
                     "} }",
-            "{ \$sort: { description: 1 } }",
+            "{ \$sort: { totalStock: -1 } }",
             "{ \$project: { _id: 0, description: 1, totalStock: 1 } }"
         ]
     )
@@ -145,7 +144,7 @@ interface HealthUnitRepository : MongoRepository<HealthUnit, String> {
         pipeline = [
             "{ \$match: { '_id': ?0 } }",
             "{ \$unwind: '\$medicines' }",
-            "{ \$sort: { 'medicines.description': 1 } }",
+            "{ \$sort: { 'medicines.total_quantity': -1 } }",
             "{ \$replaceRoot: { newRoot: '\$medicines' } }"
         ]
     )
